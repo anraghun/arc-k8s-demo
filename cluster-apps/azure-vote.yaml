@@ -1,89 +1,33 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: azure-vote-back
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: azure-vote-back
-  template:
-    metadata:
-      labels:
-        app: azure-vote-back
-    spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
-        kubernetes.io/os: linux
-      containers:
-      - name: azure-vote-back
-        image: redis
-        ports:
-        - containerPort: 6379
-          name: redis
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "250m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
----
 apiVersion: v1
 kind: Service
 metadata:
-  name: azure-vote-back
-spec:
-  ports:
-  - port: 6379
-  selector:
-    app: azure-vote-back
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: azure-vote-front
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: azure-vote-front
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-  minReadySeconds: 5 
-  template:
-    metadata:
-      labels:
-        app: azure-vote-front
-    spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
-        kubernetes.io/os: linux
-      containers:
-      - name: azure-vote-front
-        image: microsoft/azure-vote-front:v1
-        ports:
-        - containerPort: 80
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "250m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        env:
-        - name: REDIS
-          value: "azure-vote-back"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: azure-vote-front
+  name: hello-kubernetes
+  namespace: cluster-config
 spec:
   type: LoadBalancer
   ports:
   - port: 80
+    targetPort: 8080
   selector:
-    app: azure-vote-front
+    app: hello-kubernetes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-kubernetes
+  namespace: cluster-config
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-kubernetes
+  template:
+    metadata:
+      labels:
+        app: hello-kubernetes
+    spec:
+      containers:
+      - name: hello-kubernetes
+        image: paulbouwer/hello-kubernetes:1.8
+        ports:
+        - containerPort: 8080
